@@ -1,0 +1,48 @@
+{
+  "name": "cash",
+  "version": "0.0.1",
+  "description": "cash",
+  "license": "MIT",
+  "homepage": "https://github.com/lacodda/cash",
+  "author": {
+    "name": "Kirill Lahtachev",
+    "email": "lahtachev@gmail.com",
+    "url": "http://lacodda.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:lacodda/cash.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lacodda/cash/issues"
+  },
+  "keywords": [
+    "vue",
+    "node",
+    "nest",
+    "api",
+    "REST"
+  ],
+  "scripts": {
+    "start": "cross-env NODE_ENV=dev concurrently --kill-others --names \"CLIENT,SERVER\" -c \"bgBlue.bold,bgMagenta.bold\" \"yarn start:client\" \"yarn start:server\"",
+    "start:client": "cd client && npm run dev",
+    "start:server": "cd server && npm run start:dev",
+    "install-all": "npm i && cd server && npm i && cd ../client && npm i",
+    "generate-ssl": "node ./scripts/generate-ssl --hostname localhost",
+    "add-generated-ssl": "open /Applications/Utilities/Keychain\\ Access.app ssl/ssl.crt"
+  },
+  "devDependencies": {
+    "concurrently": "^6.2.1",
+    "cross-env": "^7.0.3"
+  },
+  "engines": {
+    "node": ">= 16.0.0",
+    "npm": ">= 7.0.0",
+    "yarn": "*"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ]
+}
