@@ -24,7 +24,7 @@
     "REST"
   ],
   "scripts": {
-    "start": "cross-env NODE_ENV=dev concurrently --kill-others --names \"CLIENT,SERVER\" -c \"bgBlue.bold,bgMagenta.bold\" \"yarn start:client\" \"yarn start:server\"",
+    "start": "cross-env NODE_ENV=development concurrently --kill-others --names \"CLIENT,SERVER\" -c \"bgBlue.bold,bgMagenta.bold\" \"yarn start:client\" \"yarn start:server\"",
     "start:client": "cd client && npm run dev",
     "start:server": "cd server && npm run start:dev",
     "install-all": "npm i && cd server && npm i && cd ../client && npm i",
