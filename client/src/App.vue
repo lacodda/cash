@@ -24,7 +24,18 @@
         <el-menu-item index="4">Orders</el-menu-item>
       </el-menu>
     </el-header>
-    <el-main>Main</el-main>
+    <el-main>
+      <div class="calendar__month">
+        <div
+          v-for="(day, key) in month"
+          :key="key"
+          class="calendar__day"
+          :class="{ 'calendar__day--add': !day.selected }"
+        >
+          {{ day.format }}
+        </div>
+      </div>
+    </el-main>
   </el-container>
 </template>
 
@@ -39,6 +50,57 @@ import {
   ElSubMenu,
   ElButton,
 } from "element-plus";
+import {
+  startOfMonth,
+  endOfMonth,
+  getDaysInMonth,
+  addDays,
+  subDays,
+  format,
+  getDay,
+  addMonths,
+  subMonths,
+} from "date-fns";
+import * as $R from "ramda";
+
+const firstDayOfWeek = 1;
+
+function getDayOfMonthStart(date: Date, selected: boolean, day: number) {
+  const start = startOfMonth(date);
+  const newDate = addDays(start, day);
+  return {
+    format: format(newDate, "MM/dd/yyyy"),
+    dayOfWeek: getDay(newDate),
+    date: newDate,
+    selected,
+  };
+}
+
+function getDayOfMonthEnd(date: Date, selected: boolean, day: number) {
+  const end = endOfMonth(date);
+  const newDate = subDays(end, day);
+  return {
+    format: format(newDate, "MM/dd/yyyy"),
+    dayOfWeek: getDay(newDate),
+    date: newDate,
+    selected,
+  };
+}
+
+function getMonth(date: Date) {
+  const dayStart = $R.curry(getDayOfMonthStart);
+  const dayEnd = $R.curry(getDayOfMonthEnd);
+  const month = $R.times(dayStart(date, true), getDaysInMonth(date));
+  const preMonth = $R.times(
+    dayEnd(subMonths(date, 1), false),
+    $R.head(month).dayOfWeek - firstDayOfWeek
+  );
+  const postMonth = $R.times(
+    dayStart(addMonths(date, 1), false),
+    (firstDayOfWeek ? 7 : 6) - $R.last(month).dayOfWeek
+  );
+  return $R.pipe($R.concat(month), $R.pipe($R.reverse, $R.concat)(preMonth))(postMonth);
+}
 
 export default defineComponent({
   components: {
@@ -56,10 +118,12 @@ export default defineComponent({
     const handleSelect = (key, keyPath) => {
       console.log(key, keyPath);
     };
+    const month = getMonth(new Date());
     return {
       activeIndex,
       activeIndex2,
       handleSelect,
+      month,
     };
   },
 });
@@ -79,5 +143,26 @@ body {
   -webkit-tap-highlight-color: transparent;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
+}
+
+.calendar {
+  &__month {
+    display: grid;
+    grid-template-columns: repeat(7, auto);
+    grid-template-rows: repeat(6, auto);
+    border-top: 1px solid gray;
+    border-left: 1px solid gray;
+  }
+  &__day {
+    border-bottom: 1px solid gray;
+    border-right: 1px solid gray;
+    padding: 10px;
+    display: grid;
+    justify-content: center;
+    align-content: center;
+    &--add {
+      color: rgb(236, 236, 236);
+    }
+  }
 }
 </style>
