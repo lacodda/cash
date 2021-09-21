@@ -25,14 +25,36 @@
       </el-menu>
     </el-header>
     <el-main>
-      <div class="calendar__month">
-        <div
-          v-for="(day, key) in month"
-          :key="key"
-          class="calendar__day"
-          :class="{ 'calendar__day--add': !day.selected }"
-        >
-          {{ day.format }}
+      <div class="calendar">
+        <div class="calendar__header">
+          <el-button
+            icon="el-icon-arrow-left"
+            circle
+            @click="prevMonth"
+          ></el-button>
+          <span>{{ monthName }}</span>
+          <el-button
+            icon="el-icon-arrow-right"
+            circle
+            @click="nextMonth"
+          ></el-button>
+        </div>
+        <div class="calendar__week-days">
+          <div v-for="(day, key) in week" :key="key">{{ day }}</div>
+        </div>
+        <div class="calendar__month">
+          <div
+            v-for="(day, key) in month"
+            :key="key"
+            class="calendar__day"
+            :class="{
+              'calendar__day--weekend': day.isWeekend,
+              'calendar__day--prev': day.isPrev,
+              'calendar__day--next': day.isNext,
+            }"
+          >
+            {{ day.format }}
+          </div>
         </div>
       </div>
     </el-main>
@@ -40,7 +62,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, reactive, computed } from "vue";
 import {
   ElMenuItem,
   ElContainer,
@@ -60,46 +82,67 @@ import {
   getDay,
   addMonths,
   subMonths,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
 } from "date-fns";
+import { ru } from "date-fns/locale";
 import * as $R from "ramda";
 
-const firstDayOfWeek = 1;
+const weekStartsOn = 1;
+const calendarSize = 42;
+const weekends = [6, 0];
 
-function getDayOfMonthStart(date: Date, selected: boolean, day: number) {
+function getWeek() {
+  const now = new Date();
+  const arr = eachDayOfInterval({
+    start: startOfWeek(now, { weekStartsOn }),
+    end: endOfWeek(now, { weekStartsOn }),
+  });
+
+  return arr.map((i) => format(i, "EEEE", { locale: ru }));
+}
+
+function getDayOfMonthStart(date: Date, isNext: boolean, day: number) {
   const start = startOfMonth(date);
   const newDate = addDays(start, day);
+  const dayOfWeek = getDay(newDate);
   return {
-    format: format(newDate, "MM/dd/yyyy"),
+    format: format(newDate, "dd"),
     dayOfWeek: getDay(newDate),
+    isWeekend: weekends.includes(dayOfWeek),
     date: newDate,
-    selected,
+    isNext,
   };
 }
 
-function getDayOfMonthEnd(date: Date, selected: boolean, day: number) {
+function getDayOfMonthEnd(date: Date, isPrev: boolean, day: number) {
   const end = endOfMonth(date);
   const newDate = subDays(end, day);
+  const dayOfWeek = getDay(newDate);
   return {
-    format: format(newDate, "MM/dd/yyyy"),
-    dayOfWeek: getDay(newDate),
+    format: format(newDate, "dd"),
+    dayOfWeek,
+    isWeekend: weekends.includes(dayOfWeek),
     date: newDate,
-    selected,
+    isPrev,
   };
 }
 
 function getMonth(date: Date) {
   const dayStart = $R.curry(getDayOfMonthStart);
   const dayEnd = $R.curry(getDayOfMonthEnd);
-  const month = $R.times(dayStart(date, true), getDaysInMonth(date));
+  const month = $R.times(dayStart(date, false), getDaysInMonth(date));
   const preMonth = $R.times(
-    dayEnd(subMonths(date, 1), false),
-    $R.head(month).dayOfWeek - firstDayOfWeek
+    dayEnd(subMonths(date, 1), true),
+    $R.head(month).dayOfWeek - weekStartsOn
   );
+  const cal = $R.concat(preMonth, month);
   const postMonth = $R.times(
-    dayStart(addMonths(date, 1), false),
-    (firstDayOfWeek ? 7 : 6) - $R.last(month).dayOfWeek
+    dayStart(addMonths(date, 1), true),
+    calendarSize - cal.length
   );
-  return $R.pipe($R.concat(month), $R.pipe($R.reverse, $R.concat)(preMonth))(postMonth);
+  return $R.concat(cal, postMonth);
 }
 
 export default defineComponent({
@@ -118,12 +161,28 @@ export default defineComponent({
     const handleSelect = (key, keyPath) => {
       console.log(key, keyPath);
     };
-    const month = getMonth(new Date());
+    const now = new Date();
+    let selectedMonth = ref(now);
+    const week = getWeek();
+    const month = computed(() => getMonth(selectedMonth.value));
+    function prevMonth() {
+      selectedMonth.value = subMonths(selectedMonth.value, 1);
+    }
+    function nextMonth() {
+      selectedMonth.value = addMonths(selectedMonth.value, 1);
+    }
+    const monthName = computed(() =>
+      format(selectedMonth.value, "LLLL", { locale: ru })
+    );
     return {
       activeIndex,
       activeIndex2,
       handleSelect,
       month,
+      week,
+      prevMonth,
+      nextMonth,
+      monthName,
     };
   },
 });
@@ -146,22 +205,64 @@ body {
 }
 
 .calendar {
+  --calendar-color-border: rgb(206, 206, 206);
+  --calendar-color-text: rgb(83, 83, 83);
+  --calendar-color-text-prev-next: rgb(175, 175, 175);
+  --calendar-color-background: rgb(255, 255, 255);
+  --calendar-color-hover: rgb(234, 255, 249);
+  $calendar-color-weekend: rgb(255, 243, 243);
+  --calendar-color-weekend: #{$calendar-color-weekend};
+  --calendar-color-weekend-hover: #{darken($calendar-color-weekend, 3%)};
+  &__header {
+    display: grid;
+    grid-template-columns: max-content auto max-content;
+    grid-template-rows: auto;
+    justify-items: center;
+    align-items: center;
+    padding: 10px;
+    text-transform: capitalize;
+  }
+  &__week-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: auto;
+    justify-items: center;
+    align-items: center;
+    padding: 10px;
+    text-transform: capitalize;
+  }
   &__month {
     display: grid;
-    grid-template-columns: repeat(7, auto);
+    grid-template-columns: repeat(7, 1fr);
     grid-template-rows: repeat(6, auto);
-    border-top: 1px solid gray;
-    border-left: 1px solid gray;
+    border-top: 1px solid var(--calendar-color-border);
+    border-left: 1px solid var(--calendar-color-border);
   }
   &__day {
-    border-bottom: 1px solid gray;
-    border-right: 1px solid gray;
+    --calendar-day-height: 90px;
+
+    color: var(--calendar-color-text);
+    background: var(--calendar-color-background);
+    height: var(--calendar-day-height);
+    border-bottom: 1px solid var(--calendar-color-border);
+    border-right: 1px solid var(--calendar-color-border);
     padding: 10px;
     display: grid;
-    justify-content: center;
-    align-content: center;
-    &--add {
-      color: rgb(236, 236, 236);
+    justify-content: start;
+    align-content: start;
+    cursor: pointer;
+    &:hover {
+      background: var(--calendar-color-hover);
+    }
+    &--weekend {
+      background: var(--calendar-color-weekend);
+      &:hover {
+        background: var(--calendar-color-weekend-hover);
+      }
+    }
+    &--prev,
+    &--next {
+      color: var(--calendar-color-text-prev-next);
     }
   }
 }
