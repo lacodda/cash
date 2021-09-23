@@ -44,7 +44,7 @@ import {
   ElSubMenu,
   ElButton,
 } from "element-plus";
-import Calendar from "./components/Calendar/index.vue";
+import Calendar from "./components/Calendar/Calendar.vue";
 
 export default defineComponent({
   components: {

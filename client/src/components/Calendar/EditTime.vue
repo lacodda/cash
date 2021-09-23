@@ -34,7 +34,7 @@ import { ElButton, ElPopover, ElTimePicker, ElRow, ElCol } from "element-plus";
 import * as $R from "ramda";
 
 export default defineComponent({
-  name: "EditButton",
+  name: "EditTime",
 
   components: {
     ElButton,
