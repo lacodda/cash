@@ -26,14 +26,17 @@
           'calendar__day--weekend': day.isWeekend,
           'calendar__day--add': !day.isSelectedMonth,
         }"
-        @mouseover="hover[key] = true"
-        @mouseleave="hover[key] = false"
+        @mouseover="data[key].hover = true"
+        @mouseleave="data[key].hover = false"
       >
         <transition name="el-fade-in">
           <div v-show="show" :style="{ display: 'contents' }">
             {{ day.format }}
 
-            <edit-time :show="hover[key]" />
+            <edit-time
+              v-model:time="data[key].time"
+              v-model:show="data[key].hover"
+            />
           </div>
         </transition>
       </div>
@@ -42,7 +45,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, computed } from "vue";
+import { defineComponent, ref, reactive, computed, watchEffect } from "vue";
 import { ElButton, ElPopover } from "element-plus";
 import {
   startOfMonth,
@@ -57,6 +60,8 @@ import {
   isToday,
   isWeekend,
   isSameMonth,
+  setHours,
+  startOfToday,
 } from "date-fns";
 import { ru } from "date-fns/locale";
 import * as $R from "ramda";
@@ -64,6 +69,8 @@ import EditTime from "./EditTime.vue";
 
 const weekStartsOn = 1;
 const calendarSize = 42;
+const defaultTime = setHours(startOfToday(), 9);
+// const defaultTime = setHours(startOfToday(), 9).toISOString();
 
 function getWeek() {
   const now = new Date();
@@ -108,7 +115,16 @@ export default defineComponent({
     const now = new Date();
     let show = ref(true);
     let selectedMonth = ref(now);
-    let hover = ref($R.times($R.always(false), calendarSize));
+
+    let data = $R.times(
+      () =>
+        reactive({
+          hover: false,
+          time: defaultTime,
+        }),
+      calendarSize
+    );
+
     const week = getWeek();
     const month = computed(() => getMonth(selectedMonth.value));
     function prevMonth() {
@@ -118,11 +134,12 @@ export default defineComponent({
       selectedMonth.value = addMonths(selectedMonth.value, 1);
     }
     const monthName = computed(() =>
-      format(selectedMonth.value, "LLLL", { locale: ru })
+      format(selectedMonth.value, "LLLL y", { locale: ru })
     );
+
     return {
+      data,
       show,
-      hover,
       month,
       week,
       monthName,

@@ -3,15 +3,13 @@
     ><div class="popover">
       <div class="popover__header">Time</div>
       <div class="popover__body">
-        <el-time-picker v-model="time" placeholder="Time" />
+        <el-time-picker v-model="time_" placeholder="Time" />
       </div>
       <div class="popover__footer">
         <el-button size="mini" type="text" @click="visible = false"
           >cancel</el-button
         >
-        <el-button type="primary" size="mini" @click="visible = false"
-          >confirm</el-button
-        >
+        <el-button type="primary" size="mini" @click="save">confirm</el-button>
       </div>
     </div>
     <template #reference>
@@ -29,9 +27,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, computed } from "vue";
-import { ElButton, ElPopover, ElTimePicker, ElRow, ElCol } from "element-plus";
-import * as $R from "ramda";
+import { defineComponent, ref } from "vue";
+import { ElButton, ElPopover, ElTimePicker } from "element-plus";
 
 export default defineComponent({
   name: "EditTime",
@@ -40,22 +37,30 @@ export default defineComponent({
     ElButton,
     ElPopover,
     ElTimePicker,
-    ElRow,
-    ElCol,
   },
   props: {
+    time: {
+      type: Date,
+      required: true,
+    },
     show: {
       type: Boolean,
       default: false,
     },
   },
-  setup() {
+  setup(props, ctx) {
     let visible = ref(false);
-    const time = ref(new Date(2016, 9, 10, 9, 0));
+    const time_ = ref(props.time);
+
+    function save() {
+      ctx.emit("update:time", time_);
+      visible.value = false;
+    }
 
     return {
       visible,
-      time,
+      time_,
+      save,
     };
   },
 });
