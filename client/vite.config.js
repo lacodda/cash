@@ -7,6 +7,7 @@ import i18n from '@intlify/vite-plugin-vue-i18n';
 
 const envPrefix = 'CLIENT_';
 const projectRoot = join(__dirname, '../');
+const srcRoot = resolve(__dirname, './src');
 
 export default ({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd(), envPrefix) };
@@ -24,9 +25,15 @@ export default ({ mode }) => {
         // compositionOnly: false,
 
         // you need to set i18n resource including paths!
-        include: resolve(__dirname, './i18n/**'),
+        include: resolve(srcRoot, './i18n/**'),
       }),
     ],
+    resolve: {
+      extensions: ['.js', '.vue', '.json'],
+      alias: {
+        '@': srcRoot,
+      },
+    },
     envDir: projectRoot,
     envPrefix,
     server: {

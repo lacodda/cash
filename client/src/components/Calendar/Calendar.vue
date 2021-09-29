@@ -26,16 +26,16 @@
           'calendar__day--weekend': day.isWeekend,
           'calendar__day--add': !day.isSelectedMonth,
         }"
-        @mouseover="data[key].hover = true"
-        @mouseleave="data[key].hover = false"
+        @mouseover="calendar[key].hover = true"
+        @mouseleave="calendar[key].hover = false"
       >
         <transition name="el-fade-in">
           <div v-show="show" :style="{ display: 'contents' }">
             {{ day.format }}
 
             <edit-time
-              v-model:time="data[key].time"
-              v-model:show="data[key].hover"
+              v-model:time="calendar[key].time"
+              v-model:show="calendar[key].hover"
             />
           </div>
         </transition>
@@ -50,49 +50,57 @@ import { ElButton, ElPopover } from "element-plus";
 import {
   startOfMonth,
   addDays,
-  format,
   getDay,
   addMonths,
   subMonths,
-  startOfWeek,
-  endOfWeek,
+  startOfWeekWithOptions,
+  endOfWeekWithOptions,
   eachDayOfInterval,
-  isToday,
   isWeekend,
   isSameMonth,
+  isSameDay,
   setHours,
-  startOfToday,
-} from "date-fns";
+  parseISO,
+  formatWithOptions,
+} from "date-fns/fp";
+
 import { ru } from "date-fns/locale";
 import * as $R from "ramda";
-import EditTime from "./EditTime.vue";
+import { IDay, IMonth, IDayData } from "@/models/CalendarModel";
+import EditTime from "./EditTime";
 
+const now: Date = new Date();
 const weekStartsOn = 1;
 const calendarSize = 42;
-const defaultTime = setHours(startOfToday(), 9);
-// const defaultTime = setHours(startOfToday(), 9).toISOString();
+const startOfWeek = startOfWeekWithOptions({ weekStartsOn });
+const endOfWeek = endOfWeekWithOptions({ weekStartsOn });
+const formatLng = formatWithOptions({ locale: ru });
+const formatDayOfWeek = formatLng("EEEE");
+const formatMonthName = formatLng("LLLL y");
+const formatDay = formatLng("dd");
+const defaultTime = setHours(8, startOfWeek(now));
 
 function getWeek() {
-  const now = new Date();
-  const arr = eachDayOfInterval({
-    start: startOfWeek(now, { weekStartsOn }),
-    end: endOfWeek(now, { weekStartsOn }),
+  return $R.pipe(
+    eachDayOfInterval,
+    $R.map(formatDayOfWeek)
+  )({
+    start: startOfWeek(now),
+    end: endOfWeek(now),
   });
-
-  return arr.map((i) => format(i, "EEEE", { locale: ru }));
 }
 
-function getMonth(initDate: Date) {
+function getMonth(initDate: Date): IMonth {
   const firstDayOfMonth = startOfMonth(initDate);
-  const start = startOfWeek(firstDayOfMonth, { weekStartsOn });
-  const end = addDays(start, calendarSize - 1);
+  const start = startOfWeek(firstDayOfMonth);
+  const end = addDays(calendarSize - 1, start);
 
-  const day = (date: Date) => ({
+  const day = (date: Date): IDay => ({
     date,
-    format: format(date, "dd"),
+    format: formatDay(date),
     dayOfWeek: getDay(date),
     isWeekend: isWeekend(date),
-    isToday: isToday(date),
+    isToday: isSameDay(date, new Date()),
     isSelectedMonth: isSameMonth(initDate, date),
   });
 
@@ -105,40 +113,54 @@ function getMonth(initDate: Date) {
   });
 }
 
+function getCalendar(data: Array<IDayData>, month: IMonth) {
+  const timeLens = $R.lensProp("time");
+  const parseDate = $R.over(timeLens, parseISO);
+  data = $R.map(parseDate, data);
+
+  const sameDay = (date: Date) => $R.propSatisfies(isSameDay(date), "time");
+  const setTime = (date: Date) => $R.find(sameDay(date), data);
+  const setDefaultTime = $R.when($R.isNil, $R.always({ time: defaultTime }));
+  const setHover = $R.assoc("hover", false);
+  const getDate = $R.pipe(
+    $R.prop("date"),
+    setTime,
+    setDefaultTime,
+    setHover,
+    reactive
+  );
+
+  return $R.map(getDate, month);
+}
+
 export default defineComponent({
   components: {
     ElButton,
     ElPopover,
     EditTime,
   },
-  setup() {
+  props: {
+    data: {
+      type: Array,
+    },
+  },
+  setup(props) {
     const now = new Date();
     let show = ref(true);
     let selectedMonth = ref(now);
-
-    let data = $R.times(
-      () =>
-        reactive({
-          hover: false,
-          time: defaultTime,
-        }),
-      calendarSize
-    );
-
     const week = getWeek();
     const month = computed(() => getMonth(selectedMonth.value));
     function prevMonth() {
-      selectedMonth.value = subMonths(selectedMonth.value, 1);
+      selectedMonth.value = subMonths(1, selectedMonth.value);
     }
     function nextMonth() {
-      selectedMonth.value = addMonths(selectedMonth.value, 1);
+      selectedMonth.value = addMonths(1, selectedMonth.value);
     }
-    const monthName = computed(() =>
-      format(selectedMonth.value, "LLLL y", { locale: ru })
-    );
+    const monthName = computed(() => formatMonthName(selectedMonth.value));
+    const calendar = getCalendar(props.data, month.value);
 
     return {
-      data,
+      calendar,
       show,
       month,
       week,
