@@ -1,93 +1,22 @@
 <template>
   <el-scrollbar height="100vh">
-    <el-container>
-      <el-header>
-        <el-menu
-          :default-active="activeIndex"
-          class="el-menu-demo"
-          mode="horizontal"
-          @select="handleSelect"
-        >
-          <el-menu-item index="1">Processing Center</el-menu-item>
-          <el-sub-menu index="2">
-            <template #title>Workspace</template>
-            <el-menu-item index="2-1">item one</el-menu-item>
-            <el-menu-item index="2-2">item two</el-menu-item>
-            <el-menu-item index="2-3">item three</el-menu-item>
-            <el-sub-menu index="2-4">
-              <template #title>item four</template>
-              <el-menu-item index="2-4-1">item one</el-menu-item>
-              <el-menu-item index="2-4-2">item two</el-menu-item>
-              <el-menu-item index="2-4-3">item three</el-menu-item>
-            </el-sub-menu>
-          </el-sub-menu>
-          <el-menu-item index="3" disabled>Info</el-menu-item>
-          <el-menu-item index="4">Orders</el-menu-item>
-        </el-menu>
-      </el-header>
-      <el-main>
-        <calendar :data="testData" />
-      </el-main>
-    </el-container>
+    <nav-menu />
+    <router-view />
   </el-scrollbar>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, reactive, computed } from "vue";
-import {
-  ElScrollbar,
-  ElMenuItem,
-  ElContainer,
-  ElHeader,
-  ElMain,
-  ElMenu,
-  ElSubMenu,
-  ElButton,
-} from "element-plus";
-import Calendar from "@/components/Calendar/Calendar";
-import { addDays, startOfMonth, setHours } from "date-fns/fp";
-
-function getData(days: Array<any>) {
-  const now = new Date();
-  const firstDay = startOfMonth(now);
-
-  return days.map(([day, hours]) => ({
-    time: setHours(hours, addDays(day - 1, firstDay)).toISOString(),
-  }));
-}
-
-const testDays = [
-  [2, 12],
-  [18, 10],
-  [5, 11],
-  [22, 9],
-];
-const testData = getData(testDays);
+import { ElScrollbar } from "element-plus";
+import NavMenu from "@/components/NavMenu/NavMenu";
 
 export default defineComponent({
   components: {
     ElScrollbar,
-    ElMenuItem,
-    ElContainer,
-    ElHeader,
-    ElMain,
-    ElMenu,
-    ElSubMenu,
-    ElButton,
-    Calendar,
+    NavMenu,
   },
   setup() {
-    const activeIndex = ref("1");
-    const activeIndex2 = ref("1");
-    const handleSelect = (key, keyPath) => {
-      console.log(key, keyPath);
-    };
-    return {
-      activeIndex,
-      activeIndex2,
-      handleSelect,
-      testData,
-    };
+    return {};
   },
 });
 </script>
