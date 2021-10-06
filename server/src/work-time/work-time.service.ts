@@ -1,33 +1,32 @@
-import * as $R from 'ramda';
 import { Injectable } from '@nestjs/common';
+import { Schema as MongooseSchema } from 'mongoose';
+
+import { WorkTimeRepository } from './work-time.repository';
 import { CreateWorkTimeDto } from './dto/create-work-time.dto';
 import { UpdateWorkTimeDto } from './dto/update-work-time.dto';
-import { workTime } from './work-time-mock';
-
-let workTimeData = workTime;
+import { QueryWorkTimeDto } from './dto/query-work-time.dto';
 
 @Injectable()
 export class WorkTimeService {
-  create(createWorkTimeDto: CreateWorkTimeDto) {
-    const id = (workTimeData.length + 1).toString();
-    return $R.append({ ...createWorkTimeDto, id }, workTimeData);
+  constructor(private workTimeRepository: WorkTimeRepository) {}
+
+  async create(createWorkTimeDto: CreateWorkTimeDto) {
+    return await this.workTimeRepository.create(createWorkTimeDto);
   }
 
-  findAll() {
-    return workTimeData;
+  async findAll(queryWorkTimeDto: QueryWorkTimeDto) {
+    return await this.workTimeRepository.findAll(queryWorkTimeDto);
   }
 
-  findOne(id: number) {
-    return $R.find($R.propEq('id', id), workTimeData);
+  async findOne(id: MongooseSchema.Types.ObjectId) {
+    return await this.workTimeRepository.findOne(id);
   }
 
-  update(id: number, updateWorkTimeDto: UpdateWorkTimeDto) {
-    const index = $R.findIndex($R.propEq('id', id), workTimeData);
-    return $R.update(index, updateWorkTimeDto, workTimeData);
+  async update(updateWorkTimeDto: UpdateWorkTimeDto) {
+    return await this.workTimeRepository.update(updateWorkTimeDto);
   }
 
-  remove(id: number) {
-    const index = $R.findIndex($R.propEq('id', id), workTimeData);
-    return $R.remove(index, 1, workTimeData);
+  async remove(id: MongooseSchema.Types.ObjectId) {
+    return await this.workTimeRepository.remove(id);
   }
 }

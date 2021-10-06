@@ -44,6 +44,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/mongoose": "^8.0.1",
     "@nestjs/platform-express": "^8.0.0",
+    "class-validator": "^0.13.1",
     "mongoose": "^5.13.9",
     "ramda": "^0.27.1",
     "reflect-metadata": "^0.1.13",

@@ -1,16 +1,20 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ConfigModule } from './config/config.module';
+import { ConfigService } from './config/config.service';
 import { WorkTimeModule } from './work-time/work-time.module';
-const { join } = require('path');
-
-const envFilePath = join(__dirname, `../../.env.${process.env.NODE_ENV}`);
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath,
+    ConfigModule,
+    // MongoDB Connection
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) =>
+        configService.getMongoConfig(),
     }),
     WorkTimeModule,
   ],
