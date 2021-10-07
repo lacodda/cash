@@ -12,6 +12,6 @@ export interface IMonth {
 }
 
 export interface IDayData {
-  id: string;
-  time: string;
+  _id: string;
+  dateTime: string;
 }

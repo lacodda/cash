@@ -26,6 +26,7 @@ export class ConfigService {
         key: readFileSync(join(__dirname, '../../../ssl/ssl.key')),
         cert: readFileSync(join(__dirname, '../../../ssl/ssl.crt')),
       },
+      cors: true,
     };
   }
 
