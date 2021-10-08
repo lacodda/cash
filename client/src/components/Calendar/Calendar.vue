@@ -30,15 +30,20 @@
         @mouseleave="calendar[key].hover = false"
       >
         <transition name="el-fade-in">
-          <div v-show="show" :style="{ display: 'contents' }">
+          <div
+            v-show="show"
+            :style="{ display: 'contents' }"
+            class="calendar__edit-time"
+          >
             {{ day.format }}
 
             <edit-time
-              v-model:time="calendar[key].time"
+              v-model:dateTime="calendar[key].dateTime"
               v-model:show="calendar[key].hover"
             />
           </div>
         </transition>
+        <div class="calendar__work-time">{{ calendar[key].format }}</div>
       </div>
     </div>
   </div>
@@ -78,6 +83,7 @@ const formatLng = formatWithOptions({ locale: ru });
 const formatDayOfWeek = formatLng("EEEE");
 const formatMonthName = formatLng("LLLL y");
 const formatDay = formatLng("dd");
+const formatTime = formatLng("HH:mm");
 const defaultTime = setHours(8, startOfWeek(now));
 
 function getWeek() {
@@ -114,21 +120,17 @@ function getMonth(initDate: Date): IMonth {
 }
 
 function getCalendar(data: Array<IDayData>, month: IMonth) {
-  const timeLens = $R.lensProp("time");
-  const parseDate = $R.over(timeLens, parseISO);
+  const timeLens = $R.lensProp("dateTime");
+  const formatDateTime = $R.pipe($R.view(timeLens), formatTime);
+  const setTimeFormat = (item: any) =>
+    $R.assoc("format", formatDateTime(item), item);
+  const parseDate = $R.pipe($R.over(timeLens, parseISO), setTimeFormat);
   data = $R.map(parseDate, data);
 
-  const sameDay = (date: Date) => $R.propSatisfies(isSameDay(date), "time");
-  const setTime = (date: Date) => $R.find(sameDay(date), data);
-  const setDefaultTime = $R.when($R.isNil, $R.always({ time: defaultTime }));
+  const sameDay = (date: Date) => $R.propSatisfies(isSameDay(date), "dateTime");
+  const findSameDay = (date: Date) => $R.find(sameDay(date), data);
   const setHover = $R.assoc("hover", false);
-  const getDate = $R.pipe(
-    $R.prop("date"),
-    setTime,
-    setDefaultTime,
-    setHover,
-    reactive
-  );
+  const getDate = $R.pipe($R.prop("date"), findSameDay, setHover, reactive);
 
   return $R.map(getDate, month);
 }
@@ -157,7 +159,7 @@ export default defineComponent({
       selectedMonth.value = addMonths(1, selectedMonth.value);
     }
     const monthName = computed(() => formatMonthName(selectedMonth.value));
-    const calendar = getCalendar(props.data, month.value);
+    const calendar = computed(() => getCalendar(props.data, month.value));
 
     return {
       calendar,
@@ -227,10 +229,14 @@ export default defineComponent({
     border-right: 1px solid var(--cal-color-border);
     padding: 10px;
     display: grid;
-    grid-template-columns: repeat(2, auto);
+    grid-template-columns: auto 28px;
+    grid-template-rows: 28px auto;
     justify-content: space-between;
     align-content: start;
     cursor: pointer;
+    grid-template-areas:
+      "day-num edit-time"
+      "work-time work-time";
 
     &:hover {
       background: var(--cal-bg-hover);
@@ -254,6 +260,18 @@ export default defineComponent({
         background: var(--cal-bg-add-hover);
       }
     }
+  }
+  &__day-num {
+    grid-area: day-num;
+  }
+  &__edit-time {
+    grid-area: edit-time;
+  }
+  &__work-time {
+    grid-area: work-time;
+    font-size: 28px;
+    font-weight: 700;
+    color: gray;
   }
 }
 

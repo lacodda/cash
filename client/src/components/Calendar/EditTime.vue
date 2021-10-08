@@ -39,7 +39,7 @@ export default defineComponent({
     ElTimePicker,
   },
   props: {
-    time: {
+    dateTime: {
       type: Date,
       required: true,
     },
@@ -50,10 +50,10 @@ export default defineComponent({
   },
   setup(props, ctx) {
     let visible = ref(false);
-    const time_ = ref(props.time);
+    const time_ = ref(props.dateTime);
 
     function save() {
-      ctx.emit("update:time", time_);
+      ctx.emit("update:dateTime", time_);
       visible.value = false;
     }
 

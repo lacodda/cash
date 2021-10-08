@@ -1,31 +1,14 @@
 <template>
   <el-main>
-    <calendar :data="testData" />
+    <calendar v-loading="loading" :data="data" />
   </el-main>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, computed, onMounted } from "vue";
 import { ElMain } from "element-plus";
 import Calendar from "@/components/Calendar/Calendar";
-import { addDays, startOfMonth, setHours } from "date-fns/fp";
-
-function getData(days: Array<any>) {
-  const now = new Date();
-  const firstDay = startOfMonth(now);
-
-  return days.map(([day, hours]) => ({
-    time: setHours(hours, addDays(day - 1, firstDay)).toISOString(),
-  }));
-}
-
-const testDays = [
-  [2, 12],
-  [18, 10],
-  [5, 11],
-  [22, 9],
-];
-const testData = getData(testDays);
+import { useStore } from "vuex";
 
 export default defineComponent({
   components: {
@@ -33,9 +16,22 @@ export default defineComponent({
     Calendar,
   },
   setup() {
-    return {
-      testData,
-    };
+    const store = useStore();
+    const data = computed(() => store.state.workTime.data);
+    const loading = computed(() => store.state.workTime.loading.data);
+
+    onMounted(async () => {
+      await store.dispatch("workTime/fetch");
+    });
+
+    return { data, loading };
   },
 });
 </script>
+<style lang="scss" scoped>
+.loading {
+  position: absolute !important;
+  height: 100%;
+  width: 100%;
+}
+</style>

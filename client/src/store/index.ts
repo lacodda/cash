@@ -1,9 +1,8 @@
 import { createStore } from "vuex";
+import workTime from "./work-time";
 
 export default createStore({
-  state: {},
-  getters: {},
-  actions: {},
-  mutations: {},
-  strict: true,
+  modules: {
+    workTime,
+  },
 });
