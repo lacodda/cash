@@ -29,7 +29,7 @@ export default ({ mode }) => {
       }),
     ],
     resolve: {
-      extensions: ['.js', '.vue', '.json'],
+      extensions: ['.js', '.ts', '.vue', '.json'],
       alias: {
         '@': srcRoot,
       },
