@@ -14,7 +14,8 @@ export class WorkTimeRepository {
 
   async create(createWorkTimeDto: CreateWorkTimeDto) {
     const data = {
-      dateTime: new Date(createWorkTimeDto.dateTime),
+      date: new Date(createWorkTimeDto.date),
+      time: createWorkTimeDto.time,
     };
     const newWorkTime = new this.workTimeModel(data);
     try {
@@ -28,7 +29,7 @@ export class WorkTimeRepository {
 
   async update(updateWorkTime: UpdateWorkTimeDto) {
     const data = {
-      dateTime: new Date(updateWorkTime.dateTime),
+      time: updateWorkTime.time,
     };
 
     try {
@@ -48,7 +49,7 @@ export class WorkTimeRepository {
 
     if (query.from && query.to) {
       params = {
-        dateTime: {
+        date: {
           $gte: new Date(query.from).toISOString(),
           $lte: new Date(query.to).toISOString(),
         },

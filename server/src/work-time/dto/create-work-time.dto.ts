@@ -6,5 +6,8 @@ export class CreateWorkTimeDto {
   id: MongooseSchema.Types.ObjectId;
 
   @IsOptional()
-  dateTime: string;
+  date: string;
+
+  @IsOptional()
+  time: number;
 }

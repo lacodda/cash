@@ -62,7 +62,7 @@ export default defineComponent({
     });
 
     function save() {
-      ctx.emit("update:dateTime", time_.value);
+      ctx.emit("update:dateTime", time.value);
       visible.value = false;
     }
 
