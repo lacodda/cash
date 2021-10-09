@@ -3,7 +3,7 @@
     ><div class="popover">
       <div class="popover__header">Time</div>
       <div class="popover__body">
-        <el-time-picker v-model="time_" placeholder="Time" />
+        <el-time-picker v-model="time" placeholder="Time" />
       </div>
       <div class="popover__footer">
         <el-button size="mini" type="text" @click="visible = false"
@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, computed } from "vue";
 import { ElButton, ElPopover, ElTimePicker } from "element-plus";
 
 export default defineComponent({
@@ -41,25 +41,34 @@ export default defineComponent({
   props: {
     dateTime: {
       type: Date,
-      required: true,
     },
     show: {
       type: Boolean,
       default: false,
     },
+    defaultTime: {
+      type: Date,
+    },
   },
   setup(props, ctx) {
     let visible = ref(false);
-    const time_ = ref(props.dateTime);
+    let time_ = ref(null);
+
+    const time = computed({
+      get: () => time_.value || props.dateTime || props.defaultTime,
+      set: (val) => {
+        time_.value = val;
+      },
+    });
 
     function save() {
-      ctx.emit("update:dateTime", time_);
+      ctx.emit("update:dateTime", time_.value);
       visible.value = false;
     }
 
     return {
       visible,
-      time_,
+      time,
       save,
     };
   },

@@ -1,4 +1,4 @@
-import http from "@/HttpClient.ts";
+import http from "@/HttpClient";
 
 /* eslint-disable */
 class WorkTimeService {

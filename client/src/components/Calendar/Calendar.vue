@@ -40,6 +40,7 @@
             <edit-time
               v-model:dateTime="calendar[key].dateTime"
               v-model:show="calendar[key].hover"
+              :defaultTime="defaultTime"
             />
           </div>
         </transition>
@@ -167,6 +168,7 @@ export default defineComponent({
       month,
       week,
       monthName,
+      defaultTime,
       prevMonth,
       nextMonth,
     };
@@ -233,7 +235,7 @@ export default defineComponent({
     grid-template-rows: 28px auto;
     justify-content: space-between;
     align-content: start;
-    cursor: pointer;
+    cursor: default;
     grid-template-areas:
       "day-num edit-time"
       "work-time work-time";
