@@ -26,8 +26,8 @@
           'calendar__day--weekend': day.isWeekend,
           'calendar__day--add': !day.isSelectedMonth,
         }"
-        @mouseover="calendar[key].hover = true"
-        @mouseleave="calendar[key].hover = false"
+        @mouseover="hover[key] = true"
+        @mouseleave="hover[key] = false"
       >
         <transition name="el-fade-in">
           <div
@@ -35,23 +35,31 @@
             :style="{ display: 'contents' }"
             class="calendar__edit-time"
           >
-            {{ day.format }}
+            {{ day.formatted }}
 
             <edit-time
-              v-model:dateTime="calendar[key].dateTime"
-              v-model:show="calendar[key].hover"
+              v-model:show="hover[key]"
+              :dayData="calendar[key]"
               :defaultTime="defaultTime"
+              @save="save"
             />
           </div>
         </transition>
-        <div class="calendar__work-time">{{ calendar[key].format }}</div>
+        <div class="calendar__work-time">{{ calendar[key].formatted }}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, computed, watchEffect } from "vue";
+import {
+  defineComponent,
+  ref,
+  reactive,
+  computed,
+  watchEffect,
+  watch,
+} from "vue";
 import { ElButton, ElPopover } from "element-plus";
 import {
   startOfMonth,
@@ -66,6 +74,7 @@ import {
   isSameMonth,
   isSameDay,
   setHours,
+  setSeconds,
   parseISO,
   formatWithOptions,
 } from "date-fns/fp";
@@ -87,7 +96,7 @@ const formatDay = formatLng("dd");
 const formatTime = formatLng("HH:mm");
 const defaultTime = setHours(8, startOfWeek(now));
 
-function getWeek() {
+function getWeek(): Array<string> {
   return $R.pipe(
     eachDayOfInterval,
     $R.map(formatDayOfWeek)
@@ -104,7 +113,7 @@ function getMonth(initDate: Date): IMonth {
 
   const day = (date: Date): IDay => ({
     date,
-    format: formatDay(date),
+    formatted: formatDay(date),
     dayOfWeek: getDay(date),
     isWeekend: isWeekend(date),
     isToday: isSameDay(date, new Date()),
@@ -120,18 +129,19 @@ function getMonth(initDate: Date): IMonth {
   });
 }
 
-function getCalendar(data: Array<IDayData>, month: IMonth) {
-  const timeLens = $R.lensProp("dateTime");
-  const formatDateTime = $R.pipe($R.view(timeLens), formatTime);
-  const setTimeFormat = (item: any) =>
-    $R.assoc("format", formatDateTime(item), item);
-  const parseDate = $R.pipe($R.over(timeLens, parseISO), setTimeFormat);
-  data = $R.map(parseDate, data);
+function getCalendar(data: Array<IDayData>, month: IMonth): Array<IDayData> {
+  const dateLens = $R.lensProp("date");
+  data = $R.map($R.over(dateLens, parseISO), data);
 
-  const sameDay = (date: Date) => $R.propSatisfies(isSameDay(date), "dateTime");
+  const sameDay = (date: Date) => $R.propSatisfies(isSameDay(date), "date");
   const findSameDay = (date: Date) => $R.find(sameDay(date), data);
-  const setHover = $R.assoc("hover", false);
-  const getDate = $R.pipe($R.prop("date"), findSameDay, setHover, reactive);
+  const merge = ({ date }: any) => $R.mergeLeft({ date }, findSameDay(date));
+  const getFormatted = (obj: any) =>
+    $R.pipe(() => setSeconds(obj.time, obj.date), formatTime)(obj);
+  const setFormatted = (obj: any) =>
+    $R.assoc("formatted", getFormatted(obj), obj);
+  const formatted = (obj: any) => $R.when($R.has("time"), setFormatted)(obj);
+  const getDate = $R.pipe($R.pick(["date"]), merge, formatted);
 
   return $R.map(getDate, month);
 }
@@ -151,19 +161,26 @@ export default defineComponent({
     const now = new Date();
     let show = ref(true);
     let selectedMonth = ref(now);
-    const week = getWeek();
-    const month = computed(() => getMonth(selectedMonth.value));
-    function prevMonth() {
+    const week: Array<string> = getWeek();
+    const month: IMonth = computed(() => getMonth(selectedMonth.value));
+    function prevMonth(): void {
       selectedMonth.value = subMonths(1, selectedMonth.value);
     }
-    function nextMonth() {
+    function nextMonth(): void {
       selectedMonth.value = addMonths(1, selectedMonth.value);
     }
     const monthName = computed(() => formatMonthName(selectedMonth.value));
-    const calendar = computed(() => getCalendar(props.data, month.value));
+    const hover: Array<boolean> = reactive($R.times($R.F, calendarSize));
+    const calendar = computed(() =>
+      reactive(getCalendar(props.data, month.value))
+    );
+    function save(dateTime: IDayData) {
+      console.log("dateTime", dateTime);
+    }
 
     return {
       calendar,
+      hover,
       show,
       month,
       week,
@@ -171,6 +188,7 @@ export default defineComponent({
       defaultTime,
       prevMonth,
       nextMonth,
+      save,
     };
   },
 });

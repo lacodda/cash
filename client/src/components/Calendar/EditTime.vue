@@ -27,8 +27,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from "vue";
+import { defineComponent, ref, computed, PropType } from "vue";
 import { ElButton, ElPopover, ElTimePicker } from "element-plus";
+import { IDayData } from "@/models/CalendarModel";
 
 export default defineComponent({
   name: "EditTime",
@@ -39,8 +40,9 @@ export default defineComponent({
     ElTimePicker,
   },
   props: {
-    dateTime: {
-      type: Date,
+    dayData: {
+      type: Object as PropType<IDayData>,
+      required: true,
     },
     show: {
       type: Boolean,
@@ -54,15 +56,15 @@ export default defineComponent({
     let visible = ref(false);
     let time_ = ref(null);
 
-    const time = computed({
-      get: () => time_.value || props.dateTime || props.defaultTime,
+    const time: IDayData = computed({
+      get: () => time_.value || props.dayData.time || props.defaultTime,
       set: (val) => {
         time_.value = val;
       },
     });
 
     function save() {
-      ctx.emit("update:dateTime", time.value);
+      ctx.emit("save", { ...props.dayData, time: time.value });
       visible.value = false;
     }
 
