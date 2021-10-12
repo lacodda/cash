@@ -34,7 +34,7 @@ export class WorkTimeRepository {
 
     try {
       const workTime = await this.workTimeModel
-        .findOneAndUpdate({ _id: updateWorkTime.id }, data, {
+        .findOneAndUpdate({ _id: updateWorkTime._id }, data, {
           new: true,
         })
         .exec();
