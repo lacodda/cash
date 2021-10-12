@@ -52,7 +52,9 @@ export default defineComponent({
       type: Date,
     },
   },
-  setup(props, ctx) {
+  emits: ["save"],
+  
+  setup(props, { emit }) {
     let visible = ref(false);
     let time_ = ref(null);
 
@@ -64,7 +66,7 @@ export default defineComponent({
     });
 
     function save(): void {
-      ctx.emit("save", { ...props.dayData, time: time.value });
+      emit("save", { ...props.dayData, time: time.value });
       visible.value = false;
     }
 

@@ -171,7 +171,9 @@ export default defineComponent({
       type: Array,
     },
   },
-  setup(props, ctx) {
+  emits: ["save"],
+
+  setup(props, { emit }) {
     const now = new Date();
     let show = ref(true);
     let selectedMonth = ref(now);
@@ -197,7 +199,7 @@ export default defineComponent({
         Math.abs
       )(dayData.time);
 
-      ctx.emit("save", { ...dayData, time });
+      emit("save", { ...dayData, time });
     }
 
     return {

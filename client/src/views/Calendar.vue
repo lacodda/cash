@@ -16,6 +16,7 @@ export default defineComponent({
     ElMain,
     Calendar,
   },
+
   setup() {
     const store = useStore();
     const data = computed(() => store.state.workTime.data);
