@@ -1,14 +1,15 @@
 <template>
   <el-main>
-    <calendar v-loading="loading" :data="data" />
+    <calendar v-loading="loading" :data="data" @save="save" />
   </el-main>
 </template>
 
 <script lang="ts">
 import { defineComponent, computed, onMounted } from "vue";
+import { useStore } from "vuex";
 import { ElMain } from "element-plus";
 import Calendar from "@/components/Calendar/Calendar";
-import { useStore } from "vuex";
+import { IDayData } from "@/models/CalendarModel";
 
 export default defineComponent({
   components: {
@@ -21,10 +22,15 @@ export default defineComponent({
     const loading = computed(() => store.state.workTime.loading.data);
 
     onMounted(async () => {
-      await store.dispatch("workTime/fetch");
+      store.dispatch("workTime/fetch");
     });
 
-    return { data, loading };
+    async function save(dayData: IDayData): Promise<void> {
+      await store.dispatch("workTime/createOrUpdate", dayData);
+      await store.dispatch("workTime/fetch");
+    }
+
+    return { data, loading, save };
   },
 });
 </script>

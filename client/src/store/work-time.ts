@@ -1,5 +1,6 @@
 import * as $R from "ramda";
 import WorkTimeService from "@/services/WorkTimeService";
+import { IDayData } from "@/models/CalendarModel";
 
 export const types = {
   SET_WORK_TIME_DATA: "SET_WORK_TIME_DATA",
@@ -27,6 +28,16 @@ export default {
       );
 
       commit(types.SET_WORK_TIME_DATA, data);
+      commit(types.SET_LOADING, { data: false });
+    },
+
+    async createOrUpdate({ commit }, dayData: IDayData) {
+      commit(types.SET_LOADING, { data: true });
+      if (dayData._id) {
+        await WorkTimeService.update(dayData._id, dayData);
+      } else {
+        await WorkTimeService.create(dayData);
+      }
       commit(types.SET_LOADING, { data: false });
     },
   },

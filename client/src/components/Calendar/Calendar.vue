@@ -63,6 +63,7 @@ import {
 import { ElButton, ElPopover } from "element-plus";
 import {
   startOfMonth,
+  startOfDay,
   addDays,
   getDay,
   addMonths,
@@ -77,6 +78,7 @@ import {
   setSeconds,
   parseISO,
   formatWithOptions,
+  differenceInSeconds,
 } from "date-fns/fp";
 
 import { ru } from "date-fns/locale";
@@ -94,7 +96,7 @@ const formatDayOfWeek = formatLng("EEEE");
 const formatMonthName = formatLng("LLLL y");
 const formatDay = formatLng("dd");
 const formatTime = formatLng("HH:mm");
-const defaultTime = setHours(8, startOfWeek(now));
+const defaultTime = setHours(8, startOfDay(now));
 
 function getWeek(): Array<string> {
   return $R.pipe(
@@ -131,17 +133,29 @@ function getMonth(initDate: Date): IMonth {
 
 function getCalendar(data: Array<IDayData>, month: IMonth): Array<IDayData> {
   const dateLens = $R.lensProp("date");
-  data = $R.map($R.over(dateLens, parseISO), data);
+  const timeLens = $R.lensProp("time");
+  const setTime = (dayData: IDayData) =>
+    $R.over(
+      timeLens,
+      (time: number) => setSeconds(time, dayData.date),
+      dayData
+    );
+  const setFormatted = (dayData: IDayData) =>
+    $R.assoc("formatted", formatTime($R.view(timeLens, dayData)), dayData);
+
+  data = $R.map(
+    $R.pipe(
+      $R.over(dateLens, $R.pipe(parseISO, startOfDay)),
+      setTime,
+      setFormatted
+    ),
+    data
+  );
 
   const sameDay = (date: Date) => $R.propSatisfies(isSameDay(date), "date");
   const findSameDay = (date: Date) => $R.find(sameDay(date), data);
-  const merge = ({ date }: any) => $R.mergeLeft({ date }, findSameDay(date));
-  const getFormatted = (obj: any) =>
-    $R.pipe(() => setSeconds(obj.time, obj.date), formatTime)(obj);
-  const setFormatted = (obj: any) =>
-    $R.assoc("formatted", getFormatted(obj), obj);
-  const formatted = (obj: any) => $R.when($R.has("time"), setFormatted)(obj);
-  const getDate = $R.pipe($R.pick(["date"]), merge, formatted);
+  const merge = ({ date }: IDay) => $R.mergeRight({ date }, findSameDay(date));
+  const getDate = $R.pipe($R.pick(["date"]), merge);
 
   return $R.map(getDate, month);
 }
@@ -157,25 +171,33 @@ export default defineComponent({
       type: Array,
     },
   },
-  setup(props) {
+  setup(props, ctx) {
     const now = new Date();
     let show = ref(true);
     let selectedMonth = ref(now);
     const week: Array<string> = getWeek();
     const month: IMonth = computed(() => getMonth(selectedMonth.value));
+    const monthName = computed(() => formatMonthName(selectedMonth.value));
+    const hover: Array<boolean> = reactive($R.times($R.F, calendarSize));
+    const calendar = computed(() =>
+      reactive(getCalendar(props.data, month.value))
+    );
+
     function prevMonth(): void {
       selectedMonth.value = subMonths(1, selectedMonth.value);
     }
     function nextMonth(): void {
       selectedMonth.value = addMonths(1, selectedMonth.value);
     }
-    const monthName = computed(() => formatMonthName(selectedMonth.value));
-    const hover: Array<boolean> = reactive($R.times($R.F, calendarSize));
-    const calendar = computed(() =>
-      reactive(getCalendar(props.data, month.value))
-    );
-    function save(dateTime: IDayData) {
-      console.log("dateTime", dateTime);
+
+    function save(dayData: IDayData): void {
+      const time = $R.pipe(
+        startOfDay,
+        differenceInSeconds(dayData.time),
+        Math.abs
+      )(dayData.time);
+
+      ctx.emit("save", { ...dayData, time });
     }
 
     return {

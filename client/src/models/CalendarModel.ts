@@ -13,6 +13,6 @@ export interface IMonth {
 
 export interface IDayData {
   date: string;
-  time?: number;
+  time?: number | Date;
   _id?: string;
 }

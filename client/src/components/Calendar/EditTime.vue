@@ -63,7 +63,7 @@ export default defineComponent({
       },
     });
 
-    function save() {
+    function save(): void {
       ctx.emit("save", { ...props.dayData, time: time.value });
       visible.value = false;
     }
