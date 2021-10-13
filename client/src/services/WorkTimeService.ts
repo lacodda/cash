@@ -1,9 +1,10 @@
 import http from "@/HttpClient";
+import { IFetchParams } from "@/models/CalendarModel";
 
 /* eslint-disable */
 class WorkTimeService {
-  getAll(): Promise<any> {
-    return http.get("/work-time");
+  getAll(params: IFetchParams): Promise<any> {
+    return http.get("/work-time", { params });
   }
 
   get(id: string): Promise<any> {

@@ -63,6 +63,7 @@ import {
 import { ElButton, ElPopover } from "element-plus";
 import {
   startOfMonth,
+  endOfMonth,
   startOfDay,
   addDays,
   getDay,
@@ -171,7 +172,7 @@ export default defineComponent({
       type: Array,
     },
   },
-  emits: ["save"],
+  emits: ["save", "remove", "selectMonth"],
 
   setup(props, { emit }) {
     const now = new Date();
@@ -185,11 +186,29 @@ export default defineComponent({
       reactive(getCalendar(props.data, month.value))
     );
 
+    watch(
+      selectedMonth,
+      (value) => {
+        if (value) {
+          selectMonth(selectedMonth.value);
+        }
+      },
+      { immediate: true }
+    );
+
     function prevMonth(): void {
       selectedMonth.value = subMonths(1, selectedMonth.value);
     }
+
     function nextMonth(): void {
       selectedMonth.value = addMonths(1, selectedMonth.value);
+    }
+
+    function selectMonth(month: Date): void {
+      emit("selectMonth", {
+        from: startOfMonth(month),
+        to: endOfMonth(month),
+      });
     }
 
     function save(dayData: IDayData): void {
@@ -199,7 +218,12 @@ export default defineComponent({
         Math.abs
       )(dayData.time);
 
-      emit("save", { ...dayData, time });
+      if (time) {
+        emit("save", { ...dayData, time });
+        return;
+      }
+
+      emit("remove", dayData);
     }
 
     return {

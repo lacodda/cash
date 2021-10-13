@@ -1,6 +1,6 @@
 import * as $R from "ramda";
 import WorkTimeService from "@/services/WorkTimeService";
-import { IDayData } from "@/models/CalendarModel";
+import { IDayData, IFetchParams } from "@/models/CalendarModel";
 
 export const types = {
   SET_WORK_TIME_DATA: "SET_WORK_TIME_DATA",
@@ -18,13 +18,13 @@ export default {
   },
   getters: {},
   actions: {
-    async fetch({ commit }) {
+    async fetch({ commit }, params: IFetchParams) {
       commit(types.SET_LOADING, { data: true });
 
       const data = $R.pathOr(
         [],
         ["data", "data"],
-        await WorkTimeService.getAll()
+        await WorkTimeService.getAll(params)
       );
 
       commit(types.SET_WORK_TIME_DATA, data);
@@ -38,6 +38,12 @@ export default {
       } else {
         await WorkTimeService.create(dayData);
       }
+      commit(types.SET_LOADING, { data: false });
+    },
+
+    async delete({ commit }, dayData: IDayData) {
+      commit(types.SET_LOADING, { data: true });
+      await WorkTimeService.delete(dayData._id);
       commit(types.SET_LOADING, { data: false });
     },
   },

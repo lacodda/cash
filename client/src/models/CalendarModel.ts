@@ -16,3 +16,8 @@ export interface IDayData {
   time?: number | Date;
   _id?: string;
 }
+
+export interface IFetchParams {
+  from: Date;
+  to: Date;
+}
