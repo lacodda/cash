@@ -4,19 +4,22 @@ import {
   createWebHashHistory,
   RouteRecordRaw,
 } from "vue-router";
-import Home from "@/views/Home.vue";
-import Calendar from "@/views/Calendar.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "home",
-    component: Home,
+    component: () => import("@/views/Home.vue"),
   },
   {
     path: "/calendar",
     name: "calendar",
-    component: Calendar,
+    component: () => import("@/views/Calendar.vue"),
+  },
+  {
+    path: "/statistics",
+    name: "statistics",
+    component: () => import("@/views/Statistics.vue"),
   },
 ];
 

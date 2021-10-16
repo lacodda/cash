@@ -1,21 +1,29 @@
 <template>
-  <calendar
-    v-loading="loading"
-    :data="data"
-    @save="save"
-    @remove="remove"
-    @selectMonth="selectMonth"
-  />
+  <el-row :gutter="20">
+    <el-col :span="16">
+      <calendar
+        v-loading="loading"
+        :data="data"
+        @save="save"
+        @remove="remove"
+        @selectMonth="selectMonth"
+    /></el-col>
+    <el-col :span="8"><div class="grid-content bg-purple-dark"></div></el-col>
+  </el-row>
 </template>
 
 <script lang="ts">
 import { defineComponent, computed, ref } from "vue";
 import { useStore } from "vuex";
+import { ElSpace, ElRow, ElCol } from "element-plus";
 import Calendar from "@/components/Calendar/Calendar";
 import { IDayData, IFetchParams } from "@/models/CalendarModel";
 
 export default defineComponent({
   components: {
+    ElSpace,
+    ElRow,
+    ElCol,
     Calendar,
   },
 

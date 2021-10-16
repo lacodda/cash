@@ -37,6 +37,7 @@ export default defineComponent({
     const menu = [
       { index: "home", name: t("menu.home") },
       { index: "calendar", name: t("menu.calendar") },
+      { index: "statistics", name: t("menu.statistics") },
     ];
 
     const activeIndex = ref("");

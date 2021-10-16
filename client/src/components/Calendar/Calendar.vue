@@ -268,7 +268,6 @@ export default defineComponent({
     grid-template-rows: auto;
     justify-items: center;
     align-items: center;
-    padding: 10px;
     text-transform: capitalize;
   }
   &__week-days {
