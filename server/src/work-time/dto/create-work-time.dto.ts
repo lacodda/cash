@@ -1,13 +1,9 @@
-import { IsOptional } from 'class-validator';
-import { Schema as MongooseSchema } from 'mongoose';
+import { IsNumber, IsDate } from 'class-validator';
 
 export class CreateWorkTimeDto {
-  @IsOptional()
-  _id: MongooseSchema.Types.ObjectId;
-
-  @IsOptional()
+  @IsDate()
   date: string;
 
-  @IsOptional()
+  @IsNumber()
   time: number;
 }

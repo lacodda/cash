@@ -1,24 +1,24 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypegooseModule } from 'nestjs-typegoose';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ConfigModule } from './config/config.module';
-import { ConfigService } from './config/config.service';
+import config, { envFilePath } from './config/config';
+import { getMongoConfig } from './config/mongo.config';
+
 import { WorkTimeModule } from './work-time/work-time.module';
 
 @Module({
   imports: [
-    ConfigModule,
-    // MongoDB Connection
-    MongooseModule.forRootAsync({
+    ConfigModule.forRoot({
+      envFilePath,
+      load: [config],
+    }),
+    TypegooseModule.forRootAsync({
+      imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) =>
-        configService.getMongoConfig(),
+      useFactory: getMongoConfig,
     }),
     WorkTimeModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

@@ -1,32 +1,104 @@
-import { Injectable } from '@nestjs/common';
-import { Schema as MongooseSchema } from 'mongoose';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ModelType } from '@typegoose/typegoose/lib/types';
+import { InjectModel } from 'nestjs-typegoose';
 
-import { WorkTimeRepository } from './work-time.repository';
+import { WorkTimeModel } from './work-time.model';
 import { CreateWorkTimeDto } from './dto/create-work-time.dto';
 import { UpdateWorkTimeDto } from './dto/update-work-time.dto';
 import { QueryWorkTimeDto } from './dto/query-work-time.dto';
 
 @Injectable()
 export class WorkTimeService {
-  constructor(private workTimeRepository: WorkTimeRepository) {}
+  constructor(
+    @InjectModel(WorkTimeModel)
+    private readonly workTimeModel: ModelType<WorkTimeModel>,
+  ) {}
 
-  async create(createWorkTimeDto: CreateWorkTimeDto) {
-    return await this.workTimeRepository.create(createWorkTimeDto);
+  async create(dto: CreateWorkTimeDto) {
+    const data = {
+      date: new Date(dto.date),
+      time: dto.time,
+    };
+    const newWorkTime = new this.workTimeModel(data);
+    try {
+      const createdWorkTime = await newWorkTime.save();
+
+      return createdWorkTime;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
-  async findAll(queryWorkTimeDto: QueryWorkTimeDto) {
-    return await this.workTimeRepository.findAll(queryWorkTimeDto);
+  async findAll(dto: QueryWorkTimeDto) {
+    let params = {};
+
+    if (dto.from && dto.to) {
+      params = {
+        date: {
+          $gte: new Date(dto.from).toISOString(),
+          $lte: new Date(dto.to).toISOString(),
+        },
+      };
+    }
+
+    let workTimes: WorkTimeModel[];
+
+    try {
+      workTimes = await this.workTimeModel.find(params).exec();
+
+      let response;
+
+      if (workTimes.length > 0) {
+        response = {
+          ok: true,
+          data: workTimes,
+          message: 'Ok',
+        };
+      } else {
+        response = {
+          ok: true,
+          data: [],
+          message: 'Empty',
+        };
+      }
+      return response;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
-  async findOne(id: MongooseSchema.Types.ObjectId) {
-    return await this.workTimeRepository.findOne(id);
+  async findOne(id: string) {
+    try {
+      const workTime = await this.workTimeModel.findById(id).exec();
+
+      return workTime;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
-  async update(updateWorkTimeDto: UpdateWorkTimeDto) {
-    return await this.workTimeRepository.update(updateWorkTimeDto);
+  async update(id: string, dto: UpdateWorkTimeDto) {
+    const data = {
+      time: dto.time,
+    };
+
+    try {
+      const workTime = await this.workTimeModel
+        .findByIdAndUpdate(id, data, { new: true })
+        .exec();
+      return workTime;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
-  async remove(id: MongooseSchema.Types.ObjectId) {
-    return await this.workTimeRepository.remove(id);
+  async remove(id: string) {
+    try {
+      const workTime = await this.workTimeModel.findByIdAndRemove(id);
+
+      return workTime;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 }
