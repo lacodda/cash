@@ -59,8 +59,8 @@ import {
   computed,
   watchEffect,
   watch,
-} from "vue";
-import { ElButton, ElPopover } from "element-plus";
+} from 'vue';
+import { ElButton, ElPopover } from 'element-plus';
 import {
   startOfMonth,
   endOfMonth,
@@ -80,12 +80,12 @@ import {
   parseISO,
   formatWithOptions,
   differenceInSeconds,
-} from "date-fns/fp";
+} from 'date-fns/fp';
 
-import { ru } from "date-fns/locale";
-import * as $R from "ramda";
-import { IDay, IMonth, IDayData } from "@/models/CalendarModel";
-import EditTime from "./EditTime";
+import { ru } from 'date-fns/locale';
+import * as $R from 'ramda';
+import { IDay, IMonth, IDayData } from '@/models/calendar.model';
+import EditTime from './EditTime';
 
 const now: Date = new Date();
 const weekStartsOn = 1;
@@ -93,16 +93,16 @@ const calendarSize = 42;
 const startOfWeek = startOfWeekWithOptions({ weekStartsOn });
 const endOfWeek = endOfWeekWithOptions({ weekStartsOn });
 const formatLng = formatWithOptions({ locale: ru });
-const formatDayOfWeek = formatLng("EEEE");
-const formatMonthName = formatLng("LLLL y");
-const formatDay = formatLng("dd");
-const formatTime = formatLng("HH:mm");
+const formatDayOfWeek = formatLng('EEEE');
+const formatMonthName = formatLng('LLLL y');
+const formatDay = formatLng('dd');
+const formatTime = formatLng('HH:mm');
 const defaultTime = setHours(8, startOfDay(now));
 
 function getWeek(): Array<string> {
   return $R.pipe(
     eachDayOfInterval,
-    $R.map(formatDayOfWeek)
+    $R.map(formatDayOfWeek),
   )({
     start: startOfWeek(now),
     end: endOfWeek(now),
@@ -125,7 +125,7 @@ function getMonth(initDate: Date): IMonth {
 
   return $R.pipe(
     eachDayOfInterval,
-    $R.map(day)
+    $R.map(day),
   )({
     start,
     end,
@@ -133,30 +133,30 @@ function getMonth(initDate: Date): IMonth {
 }
 
 function getCalendar(data: Array<IDayData>, month: IMonth): Array<IDayData> {
-  const dateLens = $R.lensProp("date");
-  const timeLens = $R.lensProp("time");
+  const dateLens = $R.lensProp('date');
+  const timeLens = $R.lensProp('time');
   const setTime = (dayData: IDayData) =>
     $R.over(
       timeLens,
       (time: number) => setSeconds(time, dayData.date),
-      dayData
+      dayData,
     );
   const setFormatted = (dayData: IDayData) =>
-    $R.assoc("formatted", formatTime($R.view(timeLens, dayData)), dayData);
+    $R.assoc('formatted', formatTime($R.view(timeLens, dayData)), dayData);
 
   data = $R.map(
     $R.pipe(
       $R.over(dateLens, $R.pipe(parseISO, startOfDay)),
       setTime,
-      setFormatted
+      setFormatted,
     ),
-    data
+    data,
   );
 
-  const sameDay = (date: Date) => $R.propSatisfies(isSameDay(date), "date");
+  const sameDay = (date: Date) => $R.propSatisfies(isSameDay(date), 'date');
   const findSameDay = (date: Date) => $R.find(sameDay(date), data);
   const merge = ({ date }: IDay) => $R.mergeRight({ date }, findSameDay(date));
-  const getDate = $R.pipe($R.pick(["date"]), merge);
+  const getDate = $R.pipe($R.pick(['date']), merge);
 
   return $R.map(getDate, month);
 }
@@ -172,18 +172,17 @@ export default defineComponent({
       type: Array,
     },
   },
-  emits: ["save", "remove", "selectMonth"],
+  emits: ['save', 'remove', 'selectMonth'],
 
   setup(props, { emit }) {
-    const now = new Date();
-    let show = ref(true);
-    let selectedMonth = ref(now);
+    const show = ref(true);
+    const selectedMonth = ref(now);
     const week: Array<string> = getWeek();
     const month: IMonth = computed(() => getMonth(selectedMonth.value));
     const monthName = computed(() => formatMonthName(selectedMonth.value));
     const hover: Array<boolean> = reactive($R.times($R.F, calendarSize));
     const calendar = computed(() =>
-      reactive(getCalendar(props.data, month.value))
+      reactive(getCalendar(props.data, month.value)),
     );
 
     watch(
@@ -193,7 +192,7 @@ export default defineComponent({
           selectMonth(selectedMonth.value);
         }
       },
-      { immediate: true }
+      { immediate: true },
     );
 
     function prevMonth(): void {
@@ -205,7 +204,7 @@ export default defineComponent({
     }
 
     function selectMonth(month: Date): void {
-      emit("selectMonth", {
+      emit('selectMonth', {
         from: startOfMonth(month),
         to: endOfMonth(month),
       });
@@ -215,15 +214,15 @@ export default defineComponent({
       const time = $R.pipe(
         startOfDay,
         differenceInSeconds(dayData.time),
-        Math.abs
+        Math.abs,
       )(dayData.time);
 
       if (time) {
-        emit("save", { ...dayData, time });
+        emit('save', { ...dayData, time });
         return;
       }
 
-      emit("remove", dayData);
+      emit('remove', dayData);
     }
 
     return {
@@ -302,8 +301,8 @@ export default defineComponent({
     align-content: start;
     cursor: default;
     grid-template-areas:
-      "day-num edit-time"
-      "work-time work-time";
+      'day-num edit-time'
+      'work-time work-time';
 
     &:hover {
       background: var(--cal-bg-hover);

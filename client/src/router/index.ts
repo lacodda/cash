@@ -3,23 +3,23 @@ import {
   createWebHistory,
   createWebHashHistory,
   RouteRecordRaw,
-} from "vue-router";
+} from 'vue-router';
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: "/",
-    name: "home",
-    component: () => import("@/views/Home.vue"),
+    path: '/',
+    name: 'home',
+    component: () => import('@/views/Home.vue'),
   },
   {
-    path: "/calendar",
-    name: "calendar",
-    component: () => import("@/views/Calendar.vue"),
+    path: '/calendar',
+    name: 'calendar',
+    component: () => import('@/views/Calendar.vue'),
   },
   {
-    path: "/statistics",
-    name: "statistics",
-    component: () => import("@/views/Statistics.vue"),
+    path: '/statistics',
+    name: 'statistics',
+    component: () => import('@/views/Statistics.vue'),
   },
 ];
 

@@ -33,7 +33,8 @@
   },
   "devDependencies": {
     "concurrently": "^6.2.1",
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "tslint": "^6.1.3"
   },
   "engines": {
     "node": ">= 16.0.0",

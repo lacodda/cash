@@ -5,8 +5,8 @@ import {
   HttpStatus,
   Param,
   Post,
-  Put,
   Delete,
+  Patch,
   Query,
   Res,
   Version,
@@ -43,7 +43,7 @@ export class WorkTimeController {
   }
 
   @Version('1')
-  @Put(':id')
+  @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateWorkTimeDto,

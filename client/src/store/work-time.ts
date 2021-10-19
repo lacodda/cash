@@ -1,10 +1,10 @@
-import * as $R from "ramda";
-import WorkTimeService from "@/services/WorkTimeService";
-import { IDayData, IFetchParams } from "@/models/CalendarModel";
+import * as $R from 'ramda';
+import WorkTimeService from '@/services/WorkTimeService';
+import { IDayData, IFetchParams } from '@/models/calendar.model';
 
 export const types = {
-  SET_WORK_TIME_DATA: "SET_WORK_TIME_DATA",
-  SET_LOADING: "SET_LOADING",
+  SET_WORK_TIME_DATA: 'SET_WORK_TIME_DATA',
+  SET_LOADING: 'SET_LOADING',
 };
 
 export default {
@@ -23,8 +23,8 @@ export default {
 
       const data = $R.pathOr(
         [],
-        ["data", "data"],
-        await WorkTimeService.getAll(params)
+        ['data', 'data'],
+        await WorkTimeService.getAll(params),
       );
 
       commit(types.SET_WORK_TIME_DATA, data);

@@ -31,14 +31,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, PropType, watch } from "vue";
-import * as $R from "ramda";
-import { startOfDay } from "date-fns/fp";
-import { ElButton, ElPopover, ElTimePicker } from "element-plus";
-import { IDayData } from "@/models/CalendarModel";
+import { defineComponent, ref, computed, PropType, watch } from 'vue';
+import * as $R from 'ramda';
+import { startOfDay } from 'date-fns/fp';
+import { ElButton, ElPopover, ElTimePicker } from 'element-plus';
+import { IDayData } from '@/models/calendar.model';
 
 export default defineComponent({
-  name: "EditTime",
+  name: 'EditTime',
 
   components: {
     ElButton,
@@ -58,13 +58,13 @@ export default defineComponent({
       type: Date,
     },
   },
-  emits: ["save"],
+  emits: ['save'],
 
   setup(props, { emit }) {
-    let visible = ref(false);
-    let time_ = ref(null);
+    const visible = ref(false);
+    const time_ = ref(null);
 
-    let time = computed({
+    const time = computed({
       get: () => time_.value,
       set: (val) => {
         time_.value = $R.when($R.isNil, $R.always(startOfDay(new Date())))(val);
@@ -77,11 +77,11 @@ export default defineComponent({
         if (!$R.equals(value.dayData, prevValue.dayData)) {
           time_.value = props.dayData.time || props.defaultTime;
         }
-      }
+      },
     );
 
     function save(): void {
-      emit("save", { ...props.dayData, time: time.value });
+      emit('save', { ...props.dayData, time: time.value });
       visible.value = false;
     }
 

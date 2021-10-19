@@ -1,7 +1,7 @@
 export default {
   menu: {
-    home: "Home",
-    calendar: "Calendar",
-    statistics: "Statistics",
+    home: 'Home',
+    calendar: 'Calendar',
+    statistics: 'Statistics',
   },
 };
