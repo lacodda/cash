@@ -38,6 +38,7 @@
             {{ day.formatted }}
 
             <edit-time
+              v-if="day.isSelectedMonth"
               v-model:show="hover[key]"
               :dayData="calendar[key]"
               :defaultTime="defaultTime"
@@ -45,7 +46,14 @@
             />
           </div>
         </transition>
-        <div class="calendar__work-time">{{ calendar[key].formatted }}</div>
+        <div
+          class="calendar__work-time"
+          :class="{
+            'calendar__work-time': true,
+          }"
+        >
+          {{ calendar[key].formatted }}
+        </div>
       </div>
     </div>
   </div>
@@ -184,7 +192,7 @@ export default defineComponent({
     const calendar = computed(() =>
       reactive(getCalendar(props.data, month.value)),
     );
-
+    console.log(calendar);
     watch(
       selectedMonth,
       (value) => {
@@ -261,6 +269,9 @@ export default defineComponent({
   --cal-bg-weekend: #{$cal-bg-weekend};
   --cal-bg-weekend-hover: #{darken($cal-bg-weekend, 3%)};
 
+  --work-time-success: rgb(11, 77, 5);
+  --work-time-failure: rgb(116, 0, 0);
+
   &__header {
     display: grid;
     grid-template-columns: max-content auto max-content;
@@ -286,7 +297,7 @@ export default defineComponent({
     border-left: 1px solid var(--cal-color-border);
   }
   &__day {
-    --cal-day-height: 90px;
+    --cal-day-height: 70px;
 
     color: var(--cal-color);
     background: var(--cal-bg);
@@ -335,9 +346,15 @@ export default defineComponent({
   }
   &__work-time {
     grid-area: work-time;
-    font-size: 28px;
+    font-size: 25px;
     font-weight: 700;
     color: gray;
+  }
+  &__work-time--success {
+    color: var(--work-time-success);
+  }
+  &__work-time--failure {
+    color: var(--work-time-failure);
   }
 }
 
