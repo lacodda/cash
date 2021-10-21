@@ -49,7 +49,8 @@
         <div
           class="calendar__work-time"
           :class="{
-            'calendar__work-time': true,
+            'calendar__work-time--success': calendar[key].success,
+            'calendar__work-time--failure': calendar[key].failure,
           }"
         >
           {{ calendar[key].formatted }}
@@ -83,7 +84,6 @@ import {
   isWeekend,
   isSameMonth,
   isSameDay,
-  setHours,
   setSeconds,
   parseISO,
   formatWithOptions,
@@ -105,7 +105,8 @@ const formatDayOfWeek = formatLng('EEEE');
 const formatMonthName = formatLng('LLLL y');
 const formatDay = formatLng('dd');
 const formatTime = formatLng('HH:mm');
-const defaultTime = setHours(8, startOfDay(now));
+const defaultWorkTime = 28800;
+const defaultTime = setSeconds(defaultWorkTime, startOfDay(now));
 
 function getWeek(): Array<string> {
   return $R.pipe(
@@ -143,6 +144,11 @@ function getMonth(initDate: Date): IMonth {
 function getCalendar(data: Array<IDayData>, month: IMonth): Array<IDayData> {
   const dateLens = $R.lensProp('date');
   const timeLens = $R.lensProp('time');
+  const setStatus = $R.ifElse(
+    $R.propSatisfies($R.gte($R.__, defaultWorkTime), 'time'),
+    $R.assoc('success', true),
+    $R.assoc('failure', true),
+  );
   const setTime = (dayData: IDayData) =>
     $R.over(
       timeLens,
@@ -155,6 +161,7 @@ function getCalendar(data: Array<IDayData>, month: IMonth): Array<IDayData> {
   data = $R.map(
     $R.pipe(
       $R.over(dateLens, $R.pipe(parseISO, startOfDay)),
+      setStatus,
       setTime,
       setFormatted,
     ),
@@ -192,7 +199,7 @@ export default defineComponent({
     const calendar = computed(() =>
       reactive(getCalendar(props.data, month.value)),
     );
-    console.log(calendar);
+
     watch(
       selectedMonth,
       (value) => {
@@ -269,8 +276,8 @@ export default defineComponent({
   --cal-bg-weekend: #{$cal-bg-weekend};
   --cal-bg-weekend-hover: #{darken($cal-bg-weekend, 3%)};
 
-  --work-time-success: rgb(11, 77, 5);
-  --work-time-failure: rgb(116, 0, 0);
+  --work-time-success: rgb(159 255 151);
+  --work-time-failure: rgb(255 166 166);
 
   &__header {
     display: grid;
