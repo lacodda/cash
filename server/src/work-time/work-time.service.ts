@@ -1,17 +1,14 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { ModelType } from '@typegoose/typegoose/lib/types';
-import { InjectModel } from 'nestjs-typegoose';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 
-import { WorkTimeModel } from './work-time.model';
-import { CreateWorkTimeDto } from './dto/create-work-time.dto';
-import { UpdateWorkTimeDto } from './dto/update-work-time.dto';
-import { QueryWorkTimeDto } from './dto/query-work-time.dto';
+import { WorkTime } from './work-time.schema';
+import { CreateWorkTimeDto, UpdateWorkTimeDto, QueryWorkTimeDto } from './dto';
 
 @Injectable()
 export class WorkTimeService {
   constructor(
-    @InjectModel(WorkTimeModel)
-    private readonly workTimeModel: ModelType<WorkTimeModel>,
+    @InjectModel(WorkTime.name) private readonly workTimeModel: Model<WorkTime>,
   ) {}
 
   async create(dto: CreateWorkTimeDto) {
@@ -41,7 +38,7 @@ export class WorkTimeService {
       };
     }
 
-    let workTimes: WorkTimeModel[];
+    let workTimes: WorkTime[];
 
     try {
       workTimes = await this.workTimeModel.find(params).exec();

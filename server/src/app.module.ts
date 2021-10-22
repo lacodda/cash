@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypegooseModule } from 'nestjs-typegoose';
+import { MongooseModule } from '@nestjs/mongoose';
 
 import config, { envFilePath } from './config/config';
 import { getMongoConfig } from './config/mongo.config';
@@ -13,7 +13,7 @@ import { WorkTimeModule } from './work-time/work-time.module';
       envFilePath,
       load: [config],
     }),
-    TypegooseModule.forRootAsync({
+    MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: getMongoConfig,

@@ -1,19 +1,14 @@
 import { Module } from '@nestjs/common';
-import { TypegooseModule } from 'nestjs-typegoose';
+import { MongooseModule } from '@nestjs/mongoose';
 
 import { WorkTimeController } from './work-time.controller';
 import { WorkTimeService } from './work-time.service';
-import { WorkTimeModel } from './work-time.model';
+import { WorkTime, WorkTimeSchema } from './work-time.schema';
 
 @Module({
   imports: [
-    TypegooseModule.forFeature([
-      {
-        typegooseClass: WorkTimeModel,
-        schemaOptions: {
-          collection: 'WorkTime',
-        },
-      },
+    MongooseModule.forFeature([
+      { name: WorkTime.name, schema: WorkTimeSchema },
     ]),
   ],
   controllers: [WorkTimeController],
