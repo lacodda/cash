@@ -3,7 +3,8 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { WorkTime } from './work-time.schema';
-import { CreateWorkTimeDto, UpdateWorkTimeDto, QueryWorkTimeDto } from './dto';
+import { CreateWorkTimeDto, UpdateWorkTimeDto } from './dto';
+import { RangeDto } from '../dto';
 
 @Injectable()
 export class WorkTimeService {
@@ -26,7 +27,7 @@ export class WorkTimeService {
     }
   }
 
-  async findAll(dto: QueryWorkTimeDto) {
+  async findAll(dto: RangeDto) {
     let params = {};
 
     if (dto.from && dto.to) {

@@ -6,6 +6,7 @@ import config, { envFilePath } from './config/config';
 import { getMongoConfig } from './config/mongo.config';
 
 import { WorkTimeModule } from './work-time/work-time.module';
+import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { WorkTimeModule } from './work-time/work-time.module';
       useFactory: getMongoConfig,
     }),
     WorkTimeModule,
+    StatisticsModule,
   ],
 })
 export class AppModule {}

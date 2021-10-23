@@ -13,9 +13,8 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { WorkTimeService } from './work-time.service';
-import { CreateWorkTimeDto } from './dto/create-work-time.dto';
-import { UpdateWorkTimeDto } from './dto/update-work-time.dto';
-import { QueryWorkTimeDto } from './dto/query-work-time.dto';
+import { CreateWorkTimeDto, UpdateWorkTimeDto } from './dto';
+import { RangeDto } from '../dto';
 
 @Controller('work-time')
 export class WorkTimeController {
@@ -30,7 +29,7 @@ export class WorkTimeController {
 
   @Version('1')
   @Get()
-  async findAll(@Query() dto: QueryWorkTimeDto, @Res() res: Response) {
+  async findAll(@Query() dto: RangeDto, @Res() res: Response) {
     const storages = await this.workTimeService.findAll(dto);
     return res.status(HttpStatus.OK).send(storages);
   }
