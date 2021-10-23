@@ -1,5 +1,5 @@
 <template>
-  <el-popover placement="left-start" :width="160" v-model:visible="visible"
+  <el-popover placement="bottom" :width="160" v-model:visible="visible"
     ><div class="popover">
       <div class="popover__header">Time</div>
       <div class="popover__body">
@@ -73,10 +73,8 @@ export default defineComponent({
 
     watch(
       () => $R.clone(props),
-      (value, prevValue) => {
-        if (!$R.equals(value.dayData, prevValue.dayData)) {
-          time_.value = props.dayData.time || props.defaultTime;
-        }
+      () => {
+        time_.value = props.dayData.time || props.defaultTime;
       },
     );
 
