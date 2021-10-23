@@ -1,9 +1,12 @@
+import * as $R from 'ramda';
 import http from '@/http-client';
-import { IFetchParams } from '@/models/calendar.model';
+import { IFetchParams, IDayData } from '@/models/calendar.model';
+import { Dates } from '@/helpers';
 
 /* eslint-disable */
 class WorkTimeService {
-  async getAll(params: IFetchParams): Promise<any> {
+  async getAll(fetchParams: IFetchParams): Promise<any> {
+    const params = $R.map(Dates.formatISO)(fetchParams);
     return http.get(`/v1/work-time`, { params });
   }
 
@@ -11,20 +14,18 @@ class WorkTimeService {
     return http.get(`/v1/work-time/${id}`);
   }
 
-  async create(data: any): Promise<any> {
+  async create(dayData: IDayData): Promise<any> {
+    const data = { ...dayData, date: Dates.formatISO(dayData.date) };
     return http.post(`/v1/work-time`, data);
   }
 
-  async update(id: any, data: any): Promise<any> {
+  async update(id: any, dayData: IDayData): Promise<any> {
+    const data = { ...dayData, date: Dates.formatISO(dayData.date) };
     return http.patch(`/v1/work-time/${id}`, data);
   }
 
   async delete(id: any): Promise<any> {
     return http.delete(`/v1/work-time/${id}`);
-  }
-
-  async deleteAll(): Promise<any> {
-    return http.delete(`/v1/work-time`);
   }
 }
 
