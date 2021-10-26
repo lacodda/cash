@@ -1,4 +1,5 @@
 import * as $R from 'ramda';
+import { ActionContext } from 'vuex';
 import WorkTimeService from '@/services/WorkTimeService';
 import { IDayData, IFetchParams } from '@/models/calendar.model';
 
@@ -18,7 +19,7 @@ export default {
   },
   getters: {},
   actions: {
-    async fetch({ commit }, params: IFetchParams) {
+    async fetch({ commit }: ActionContext<any, any>, params: IFetchParams) {
       commit(types.SET_LOADING, { data: true });
 
       const data = $R.pathOr(
@@ -31,7 +32,10 @@ export default {
       commit(types.SET_LOADING, { data: false });
     },
 
-    async createOrUpdate({ commit }, dayData: IDayData) {
+    async createOrUpdate(
+      { commit }: ActionContext<any, any>,
+      dayData: IDayData,
+    ) {
       commit(types.SET_LOADING, { data: true });
       if (dayData._id) {
         await WorkTimeService.update(dayData._id, dayData);
@@ -41,7 +45,7 @@ export default {
       commit(types.SET_LOADING, { data: false });
     },
 
-    async delete({ commit }, dayData: IDayData) {
+    async delete({ commit }: ActionContext<any, any>, dayData: IDayData) {
       commit(types.SET_LOADING, { data: true });
       await WorkTimeService.delete(dayData._id);
       commit(types.SET_LOADING, { data: false });
