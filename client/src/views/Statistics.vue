@@ -9,17 +9,10 @@
         @selectMonth="selectMonth"
     /></el-col>
     <el-col :span="8">
-      <el-card shadow="never" class="statistics__card">
-        <template #header>
-          <div class="card-header">
-            <span>Card name</span>
-            <!-- <el-button class="button" type="text">Operation button</el-button> -->
-          </div>
-        </template>
-        <div class="statistics__body">
-          {{ statisticsWorkTime.timeSum }}
-        </div>
-      </el-card>
+      <work-time-statistics
+        v-loading="loadingStatisticsWorkTime"
+        :data="statisticsWorkTime"
+      />
     </el-col>
   </el-row>
 </template>
@@ -27,17 +20,18 @@
 <script lang="ts">
 import { defineComponent, computed, ref } from 'vue';
 import { useStore } from 'vuex';
-import { ElSpace, ElRow, ElCol, ElCard } from 'element-plus';
+import { ElSpace, ElRow, ElCol } from 'element-plus';
 import Calendar from '@/components/Calendar/Calendar';
-import { IDayData, IFetchParams } from '@/models/CalendarModel';
+import WorkTimeStatistics from '@/components/WorkTimeStatistics';
+import { IDayData, IFetchParams } from '@/models/calendar.model';
 
 export default defineComponent({
   components: {
     ElSpace,
     ElRow,
     ElCol,
-    ElCard,
     Calendar,
+    WorkTimeStatistics,
   },
 
   setup() {
@@ -81,10 +75,4 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss" scoped>
-.statistics {
-  &__card {
-    height: 100%;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

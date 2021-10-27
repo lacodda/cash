@@ -125,6 +125,7 @@ function getMonth(initDate: Date): IMonth {
 
   const day = (date: Date): IDay => ({
     date,
+    // s:'',
     formatted: formatDay(date),
     dayOfWeek: getDay(date),
     isWeekend: isWeekend(date),

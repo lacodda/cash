@@ -12,7 +12,7 @@
 import { defineComponent, computed, ref } from "vue";
 import { useStore } from "vuex";
 import Calendar from "@/components/Calendar/Calendar";
-import { IDayData, IFetchParams } from "@/models/CalendarModel";
+import { IDayData, IFetchParams } from "@/models/calendar.model";
 
 export default defineComponent({
   components: {
